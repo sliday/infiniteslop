@@ -10,16 +10,16 @@ Plus mechanical checklist:
 
 | # | Check | Status |
 |---|-------|--------|
-| 1 | Builds clean via swiftc, zero warnings | ⬜ |
-| 2 | Video plays (screenshot shows live frame) | ⬜ |
-| 3 | Floats above other apps + fullscreen (level/collectionBehavior) | ⬜ |
-| 4 | Video-only: no sidebar/chat/queue/credits visible | ⬜ |
-| 5 | Like works: heart visible, click POSTs api/like, count shown | ⬜ |
-| 6 | Drag anywhere + resizable | ⬜ |
-| 7 | Controls hover-reveal, hidden at rest (PiP behavior) | ⬜ |
-| 8 | Rounded corners + shadow like PiP | ⬜ |
-| 9 | Remembers frame across launches | ⬜ |
-| 10 | Quit affordance (hover ✕) | ⬜ |
+| 1 | Builds clean via swiftc, zero warnings | ✅ |
+| 2 | Video plays (screenshot shows live frame) | ✅ |
+| 3 | Floats above other apps + fullscreen (level/collectionBehavior) | ✅ |
+| 4 | Video-only: no sidebar/chat/queue/credits visible | ✅ |
+| 5 | Like works: heart visible, click POSTs api/like, count shown | ✅ |
+| 6 | Drag anywhere + resizable | ✅ |
+| 7 | Controls hover-reveal, hidden at rest (PiP behavior) | ✅ |
+| 8 | Rounded corners + shadow like PiP | ✅ |
+| 9 | Remembers frame across launches | ✅ |
+| 10 | Quit affordance (hover ✕) | ✅ |
 
 ## Recon findings (instrument notes — later agents read this)
 - Site: vanilla HTML+JS, HLS stream `live/playlist.m3u8` via hls.min.js, `<video id="tv">` inside `#tvwrap > #reel > .vcell`.
@@ -113,3 +113,20 @@ Round-2 "silent death" remains unexplained but unreproduced across 2 long sessio
 Fix: append stopHold() right after heartPress() in like() JS (Sources/main.swift:228).
 Site's heartPress starts a 140ms setInterval shower only pointer-up clears; we have no
 pointer-up in the page, so we clear it explicitly.
+
+### Round 4 — CRITIC VERDICT: **OURS WINS** 🏁
+All pass: like-leak fixed (0 hearts at t+10/25/40s, count 0→1→per-clip reset, burst <2s),
+like registers, drags 0px error, rest-hide, playback, stability (soak.log 0 bytes).
+Evidence: shots/critic4_*.png.
+
+## Run summary
+4 rounds, 4 fresh-context critics, bar = native macOS PiP + 10-item mechanical checklist.
+R1 gap: drag broken + matte → fixed (acceptsFirstMouse, manual 1:1 drag, full-bleed CSS).
+R2 gap: drift/over-track + silent death → drift later RETRACTED as live-human-cursor
+contamination (critic-3 proved it); hardening kept (event-derived coords, saveFrame,
+webcontent auto-reload, exception logging). Death never reproduced across 3 long sessions.
+R3 gap: like hold-timer leak → fixed (stopHold()).
+R4: ours beats bar on all measured checks. Note: over-fullscreen-app float set via
+fullScreenAuxiliary but not explicitly exercised by a critic.
+Most reusable artifact: instrument notes (screencapture -l only, fresh bounds every query,
+idle-gate against live human cursor).
