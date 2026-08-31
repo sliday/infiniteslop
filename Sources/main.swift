@@ -6,6 +6,7 @@ let hideCSS = """
 #sidebar,#chat,#chattoggle,#credit,#topleft,#livepill,#splash,#heartbtn,#mute,#namemodal,#tsmodal{display:none !important}
 ::-webkit-scrollbar{display:none}
 body{background:#000 !important}
+#tvwrap video{top:0 !important;left:0 !important;transform:none !important;width:100vw !important;height:100vh !important;max-width:none !important;max-height:none !important;aspect-ratio:auto !important;object-fit:cover !important}
 """
 
 // MARK: - hover control button
@@ -28,6 +29,7 @@ final class HoverButton: NSButton {
         layer?.shadowOffset = .zero
     }
     required init?(coder: NSCoder) { fatalError() }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
     func setSymbol(_ symbol: String, size: CGFloat) {
         let cfg = NSImage.SymbolConfiguration(pointSize: size, weight: .semibold)
         image = NSImage(systemSymbolName: symbol, accessibilityDescription: symbol)?
@@ -54,7 +56,26 @@ final class OverlayView: NSView {
     override func mouseEntered(with e: NSEvent) { showControls() }
     override func mouseMoved(with e: NSEvent) { showControls() }
     override func mouseExited(with e: NSEvent) { hideControls() }
-    override func mouseDown(with e: NSEvent) { window?.performDrag(with: e) }
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
+
+    private var dragOffset: NSPoint?
+    override func mouseDown(with e: NSEvent) {
+        guard let win = window else { return }
+        let p = convert(e.locationInWindow, from: nil)
+        let edge: CGFloat = 8
+        if p.x < edge || p.x > bounds.width - edge || p.y < edge || p.y > bounds.height - edge {
+            super.mouseDown(with: e)  // system edge-resize zone
+            return
+        }
+        let m = NSEvent.mouseLocation
+        dragOffset = NSPoint(x: m.x - win.frame.origin.x, y: m.y - win.frame.origin.y)
+    }
+    override func mouseDragged(with e: NSEvent) {
+        guard let win = window, let off = dragOffset else { return }
+        let m = NSEvent.mouseLocation
+        win.setFrameOrigin(NSPoint(x: m.x - off.x, y: m.y - off.y))
+    }
+    override func mouseUp(with e: NSEvent) { dragOffset = nil }
 
     func showControls() {
         hideTimer?.invalidate()
