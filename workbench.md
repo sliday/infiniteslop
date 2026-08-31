@@ -70,3 +70,29 @@ for system resize, CSS full-bleed (100vw/100vh cover, no transform).
   showed controls only because capture raced the 2.5s hide timer — instrument note: wait ≥5s.
 
 ### Round 2 — CRITIC running (fresh context, critic2_*.png)
+
+### Round 2 — CRITIC VERDICT: **bar wins** (closer)
+Passes 8/9: playback, float, chrome, like (0→1+burst), edge-to-edge (0px L/R; ~2pt
+top/bottom ring, marginal pass), hover/auto-hide, corners+shadow, persistence (exact).
+biggest_gap: stability — 1/5 drags over-tracked (-120,+40 → -165,+49) then +129,-87
+UNCOMMANDED drift; later process died silently mid-session (no .ips, log clean);
+crash-path relaunch lost size (340×604 → 239×425). Evidence: shots/critic2_*.png.
+
+### Round 3 — builder triage queue
+1. Uncommanded drift + over-track: suspect stale dragOffset (mouseUp missed under synthetic
+   streams / drift = later mouseDragged with stale offset). Fix: derive drag from event
+   deltaX/deltaY or clear offset on any non-dragged event; guard with pressedMouseButtons.
+2. Silent death: no crash log → likely killed? or WebKit GPU process issue. Add minimal
+   stderr logging + NSSetUncaughtExceptionHandler; reproduce via long-run soak.
+3. Crash lost size: autosave writes on move/resize normally — crash between resize+write?
+   Persist explicitly on frame change.
+
+### Round 3 — builder
+Fixes: (a) drag coords now event-derived globals (locationInWindow + frame origin) — kills
+cursor-poll race behind over-track; (b) mouseDragged guards NSEvent.pressedMouseButtons,
+clears stale offset — kills uncommanded drift after missed mouseUp; (c) explicit
+saveFrame on mouseUp — crash can't lose frame; (d) webViewWebContentProcessDidTerminate
+→ auto-reload; (e) NSSetUncaughtExceptionHandler → NSLog; app soak-run with stderr→soak.log.
+Smoke: 3/3 drags pixel-exact incl. cold-first (1045,426 / 1245,366 / 1165,246). soak.log 0 bytes.
+
+### Round 3 — CRITIC running (fresh context, critic3_*.png, 10-item checklist incl. stability)

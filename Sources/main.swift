@@ -67,15 +67,23 @@ final class OverlayView: NSView {
             super.mouseDown(with: e)  // system edge-resize zone
             return
         }
-        let m = NSEvent.mouseLocation
+        let m = Self.globalPoint(of: e, in: win)
         dragOffset = NSPoint(x: m.x - win.frame.origin.x, y: m.y - win.frame.origin.y)
     }
     override func mouseDragged(with e: NSEvent) {
         guard let win = window, let off = dragOffset else { return }
-        let m = NSEvent.mouseLocation
+        guard NSEvent.pressedMouseButtons & 1 != 0 else { dragOffset = nil; return }
+        let m = Self.globalPoint(of: e, in: win)
         win.setFrameOrigin(NSPoint(x: m.x - off.x, y: m.y - off.y))
     }
-    override func mouseUp(with e: NSEvent) { dragOffset = nil }
+    override func mouseUp(with e: NSEvent) {
+        dragOffset = nil
+        window?.saveFrame(usingName: "SlopWindowFrame")
+    }
+    static func globalPoint(of e: NSEvent, in win: NSWindow) -> NSPoint {
+        let p = e.locationInWindow
+        return NSPoint(x: win.frame.origin.x + p.x, y: win.frame.origin.y + p.y)
+    }
 
     func showControls() {
         hideTimer?.invalidate()
@@ -234,8 +242,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
     func webView(_ w: WKWebView, didFinish nav: WKNavigation!) {
         refreshLikeCount()
     }
+
+    func webViewWebContentProcessDidTerminate(_ w: WKWebView) {
+        NSLog("SlopWindow: web content process died, reloading")
+        w.load(URLRequest(url: URL(string: "https://infiniteslop.ai")!))
+    }
 }
 
+NSSetUncaughtExceptionHandler { e in
+    NSLog("SlopWindow uncaught exception: %@ %@", e.name.rawValue, e.reason ?? "")
+}
 let app = NSApplication.shared
 app.setActivationPolicy(.accessory)
 let delegate = AppDelegate()
