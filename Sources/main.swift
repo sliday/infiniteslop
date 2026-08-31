@@ -225,7 +225,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
 
     @objc func like() {
         webView.evaluateJavaScript(
-            "heartPress(30, innerHeight - 80); document.querySelector('#heartbtn .cnt')?.textContent"
+            "heartPress(30, innerHeight - 80); stopHold(); document.querySelector('#heartbtn .cnt')?.textContent"
         ) { [weak self] result, _ in
             if let s = result as? String { self?.likeCountLabel.stringValue = s }
         }

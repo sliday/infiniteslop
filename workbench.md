@@ -96,3 +96,20 @@ saveFrame on mouseUp — crash can't lose frame; (d) webViewWebContentProcessDid
 Smoke: 3/3 drags pixel-exact incl. cold-first (1045,426 / 1245,366 / 1165,246). soak.log 0 bytes.
 
 ### Round 3 — CRITIC running (fresh context, critic3_*.png, 10-item checklist incl. stability)
+
+### Round 3 — CRITIC VERDICT: **bar wins** (one defect left)
+9/10 pass: playback, float, chrome, drag (8/8 idle-gated drags 0px error 0 drift incl.
+cold + 4s slow), edge-to-edge 0.0pt, hover/auto-hide, corners+shadow, persistence exact,
+stability (alive start+end, soak.log empty).
+FAIL #4 like: app's heartPress() call leaves site holdTimer running → count self-inflates
+(719→824 in 12.3s, ~8.5/s) + permanent heart rain over video.
+INSTRUMENT CORRECTION (equal prominence, per gauntlet rule): round-2's "over-track,
+uncommanded drift" findings were CONTAMINATED by the live human cursor at this Mac —
+critic-3 sampled cursor during "zero input" and matched every jump 1:1 to external cursor
+deltas. Round-2 drift finding retracted; round-3 idle-gated table is authoritative.
+Round-2 "silent death" remains unexplained but unreproduced across 2 long sessions.
+
+### Round 4 — builder
+Fix: append stopHold() right after heartPress() in like() JS (Sources/main.swift:228).
+Site's heartPress starts a 140ms setInterval shower only pointer-up clears; we have no
+pointer-up in the page, so we clear it explicitly.
