@@ -1,5 +1,7 @@
 # SlopWindow
 
+<img width="1512" height="982" alt="CleanShot 2026-08-31 at 16 55 41" src="https://github.com/user-attachments/assets/7db0d43b-a4d4-446b-af22-057a0a9d5734" />
+
 A tiny Mac app that puts [infiniteslop.ai](https://infiniteslop.ai) in a small floating window. That site is an endless TV channel where every video is made by AI.
 
 The window shows just the video. No chat, no menus, no clutter. It stays on top of everything, so you can watch while you do other stuff.
