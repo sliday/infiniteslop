@@ -1,20 +1,36 @@
 # SlopWindow
 
-Floating always-on-top macOS window that plays [infiniteslop.ai](https://infiniteslop.ai) — video only, with ❤️ like.
+A tiny Mac app that puts [infiniteslop.ai](https://infiniteslop.ai) in a small floating window. That site is an endless TV channel where every video is made by AI.
 
-Picture-in-Picture style: borderless rounded window, hover-reveal controls (✕ close, 🔊 mute toggle, ❤️ like + count), drag anywhere inside, resize by edges (9:16 aspect locked), floats over all apps and Spaces, remembers position.
+The window shows just the video. No chat, no menus, no clutter. It stays on top of everything, so you can watch while you do other stuff.
 
-## Build & run
+## Get it
+
+Grab the newest build from **[Releases](https://github.com/sliday/infiniteslop/releases)**. Unzip, then open `SlopWindow.app`.
+
+First open: right-click the app → Open (it is not from the App Store, so your Mac asks once).
+
+## How to use it
+
+- **Move it**: click anywhere on the video and drag.
+- **Resize it**: drag the edges. It keeps its tall phone shape.
+- **Like a video**: move your mouse over the window, click the ❤️. Hearts fly. Your like counts on the real site.
+- **Sound**: click the speaker icon to unmute.
+- **Close**: click the ✕ in the corner.
+- Controls hide by themselves when your mouse leaves. Just the video, like Picture-in-Picture.
+- It remembers where you left it.
+
+## Build it yourself
 
 ```sh
 ./build.sh
 open SlopWindow.app
 ```
 
-Requires Xcode command line tools (swiftc). No dependencies.
+You need the Xcode command line tools. That is all. One Swift file, no dependencies.
 
-## How it works
+## How it works (short version)
 
-Single-file AppKit app (`Sources/main.swift`): a non-activating floating `NSPanel` hosts a `WKWebView` loading the live site, with injected CSS stripping everything except the video. A native overlay swallows mouse events for window dragging and hosts the hover controls; like/mute call the site's own JS (`heartPress()` → `POST api/like`).
+The app opens the real website inside a hidden browser view, then injects a bit of CSS that hides everything except the video. The buttons you see (❤️, ✕, speaker) are native Mac buttons drawn on top. The ❤️ button calls the site's own like code, so likes are real.
 
-Built with a [Gauntlet Loop](https://somethingbig.ai/gauntlet-loop) against a macOS-native PiP quality bar — see `workbench.md` for the round log.
+Built with a [Gauntlet Loop](https://somethingbig.ai/gauntlet-loop): one agent builds, a separate fresh agent judges it against real macOS Picture-in-Picture, repeat. Round log lives in `workbench.md`.
